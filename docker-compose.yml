@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  php:
+    build:
+      context: ./php
+      args:
+        USER_NAME: 'sam'
+        UID: '1000'
+    container_name: php
+    restart: always
+    volumes:
+      - ./public_html/:/var/www/html/
+    networks:
+      docker-lamp:
+  httpd:
+    build:
+      context: ./httpd
+    container_name: httpd
+    restart: always
+    volumes:
+      - ./httpd/conf:/usr/local/apache2/conf/docker
+      - ./public_html/:/var/www/html/
+    networks:
+      docker-lamp:
+  mariadb:
+    image: mariadb:10.3
+    container_name: maziadb
+    restart: always
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    environment:
+        MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+        MYSQL_ROOT_PASSWORD: "1"
+    networks:
+      docker-lamp:
+        ipv4_address: 10.5.0.6
+networks:
+  docker-lamp:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
